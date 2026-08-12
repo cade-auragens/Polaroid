@@ -1,0 +1,324 @@
+"use client"
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { getAllPhotos, putPhoto, todayIso, formatDate, downscale, type Photo } from "@/lib/photo-db"
+import { DesktopIcons } from "@/components/desktop-icons"
+import { ReelWindow } from "@/components/windows/reel-window"
+import { AlbumWindow } from "@/components/windows/album-window"
+import { CalendarWindow } from "@/components/windows/calendar-window"
+import { DayWindow } from "@/components/windows/day-window"
+import { AboutWindow } from "@/components/windows/about-window"
+import { LoginWindow } from "@/components/windows/login-window"
+import { Lightbox } from "@/components/windows/lightbox"
+import { Taskbar } from "@/components/taskbar"
+
+export type Frame = {
+  url: string
+  iso: string
+  yearLabel: string
+  dayLabel: string
+  dateLabel: string
+}
+
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+]
+
+export type LightboxState = { url: string; iso: string; day: string; date: string } | null
+export type DayState = { m: number; d: number } | null
+
+export function Desktop() {
+  const [photos, setPhotos] = useState<Photo[]>([])
+  const [authed, setAuthed] = useState(false)
+
+  // Window open state
+  const [reelOpen, setReelOpen] = useState(true)
+  const [albumOpen, setAlbumOpen] = useState(false)
+  const [calendarOpen, setCalendarOpen] = useState(false)
+  const [aboutOpen, setAboutOpen] = useState(false)
+  const [loginOpen, setLoginOpen] = useState(false)
+  const [loginError, setLoginError] = useState(false)
+
+  const [calMonth, setCalMonth] = useState(new Date().getMonth())
+  const [day, setDay] = useState<DayState>(null)
+  const [lightbox, setLightbox] = useState<LightboxState>(null)
+  const [clock, setClock] = useState("")
+
+  const [zTop, setZTop] = useState(20)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  // z-index registry per window so focus brings to front
+  const [zIndex, setZIndex] = useState<Record<string, number>>({})
+  const focus = useCallback((name: string) => {
+    setZTop((z) => {
+      const next = z + 1
+      setZIndex((m) => ({ ...m, [name]: next }))
+      return next
+    })
+  }, [])
+
+  const load = useCallback(async () => {
+    try {
+      setPhotos(await getAllPhotos())
+    } catch (e) {
+      console.warn("photo store unavailable", e)
+    }
+  }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  useEffect(() => {
+    const tick = () => {
+      const d = new Date()
+      let h = d.getHours()
+      const ap = h >= 12 ? "PM" : "AM"
+      h = h % 12 || 12
+      setClock(`${h}:${String(d.getMinutes()).padStart(2, "0")} ${ap}`)
+    }
+    tick()
+    const t = setInterval(tick, 15000)
+    return () => clearInterval(t)
+  }, [])
+
+  const frames = useMemo<Frame[]>(
+    () =>
+      photos.map((p, i) => ({
+        url: p.url,
+        iso: p.date,
+        yearLabel: p.date.slice(0, 4),
+        dayLabel: `Day ${i + 1}`,
+        dateLabel: formatDate(p.date),
+      })),
+    [photos],
+  )
+
+  const openFrame = useCallback((f: Frame) => {
+    setLightbox({ url: f.url, iso: f.iso, day: f.dayLabel, date: f.dateLabel })
+    focus("lightbox")
+  }, [focus])
+
+  // File upload flow
+  const onFile = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      e.target.value = ""
+      if (!file) return
+      const date = todayIso()
+      if (photos.some((p) => p.date === date) && !window.confirm("A frame already exists for today. Replace it?")) {
+        return
+      }
+      const url = await downscale(file)
+      await putPhoto({ date, url, added: Date.now() })
+      load()
+    },
+    [photos, load],
+  )
+
+  const afterLogin = useCallback(() => {
+    setAuthed(true)
+    setLoginOpen(false)
+    setLoginError(false)
+    setReelOpen(true)
+    focus("reel")
+    setTimeout(() => fileRef.current?.click(), 120)
+  }, [focus])
+
+  const submitLogin = useCallback((user: string, pass: string) => {
+    if (user.trim().toUpperCase() === "POLAROID" && pass.trim().toUpperCase() === "VIBECODING") {
+      afterLogin()
+    } else {
+      setLoginError(true)
+    }
+  }, [afterLogin])
+
+  const tryUpload = useCallback(() => {
+    if (authed) fileRef.current?.click()
+    else {
+      setLoginOpen(true)
+      setLoginError(false)
+      focus("login")
+    }
+  }, [authed, focus])
+
+  const clockClick = useCallback(() => {
+    if (authed) setAuthed(false)
+    else {
+      setLoginOpen(true)
+      setLoginError(false)
+      focus("login")
+    }
+  }, [authed, focus])
+
+  const openWindow = useCallback(
+    (setter: (v: boolean) => void, name: string) => {
+      setter(true)
+      focus(name)
+    },
+    [focus],
+  )
+
+  const openReel = () => openWindow(setReelOpen, "reel")
+  const openAlbum = () => openWindow(setAlbumOpen, "album")
+  const openCalendar = () => openWindow(setCalendarOpen, "calendar")
+  const openAbout = () => openWindow(setAboutOpen, "about")
+
+  const openDay = useCallback(
+    (m: number, d: number) => {
+      setDay({ m, d })
+      focus("day")
+    },
+    [focus],
+  )
+
+  const shiftDay = useCallback(
+    (delta: number) => {
+      const cur = day ?? { m: new Date().getMonth(), d: new Date().getDate() }
+      const dt = new Date(2024, cur.m, cur.d + delta)
+      setDay({ m: dt.getMonth(), d: dt.getDate() })
+      setCalMonth(dt.getMonth())
+    },
+    [day],
+  )
+
+  // Derived data
+  const count = frames.length
+  const last = photos[photos.length - 1]
+  const albumFrames = useMemo(() => frames.slice().reverse(), [frames])
+
+  const dayKey = day ? `${String(day.m + 1).padStart(2, "0")}-${String(day.d).padStart(2, "0")}` : null
+  const dayFrames = useMemo(
+    () => (dayKey ? frames.filter((f) => f.iso.slice(5) === dayKey).reverse() : []),
+    [dayKey, frames],
+  )
+
+  const lightboxThisDay = useCallback(() => {
+    if (!lightbox) return
+    const p = lightbox.iso.split("-").map(Number)
+    setLightbox(null)
+    openDay(p[1] - 1, p[2])
+  }, [lightbox, openDay])
+
+  return (
+    <div
+      className="relative w-full min-h-screen overflow-hidden pb-[34px]"
+      style={{
+        background: "#0a1180",
+        backgroundImage:
+          "repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 3px)",
+      }}
+    >
+      {/* Centered title wallpaper */}
+      <img
+        src="/title.png"
+        alt="The Daily Polaroid Project — By: Cam Labrecque"
+        className="absolute left-1/2 top-1/2 pointer-events-none z-[1]"
+        style={{ transform: "translate(-50%, -54%)", width: "min(660px, 62%)" }}
+      />
+
+      <DesktopIcons
+        todayDayNum={String(new Date().getDate())}
+        onReel={openReel}
+        onAlbum={openAlbum}
+        onCalendar={openCalendar}
+        onAbout={openAbout}
+      />
+
+      {reelOpen && (
+        <ReelWindow
+          z={zIndex.reel}
+          onFocus={() => focus("reel")}
+          onClose={() => setReelOpen(false)}
+          frames={frames}
+          authed={authed}
+          count={count}
+          latestLabel={last ? `Latest: Day ${count} — ${formatDate(last.date)}` : "Waiting for Day 1"}
+          onUpload={tryUpload}
+          onOpenAlbum={openAlbum}
+          onOpenCalendar={openCalendar}
+          onOpenFrame={openFrame}
+        />
+      )}
+
+      {albumOpen && (
+        <AlbumWindow
+          z={zIndex.album}
+          onFocus={() => focus("album")}
+          onClose={() => setAlbumOpen(false)}
+          frames={albumFrames}
+          count={count}
+          onOpenFrame={openFrame}
+        />
+      )}
+
+      {calendarOpen && (
+        <CalendarWindow
+          z={zIndex.calendar}
+          onFocus={() => focus("calendar")}
+          onClose={() => setCalendarOpen(false)}
+          monthName={MONTHS[calMonth]}
+          calMonth={calMonth}
+          taken={new Set(photos.map((p) => p.date.slice(5)))}
+          onPrevMonth={() => setCalMonth((calMonth + 11) % 12)}
+          onNextMonth={() => setCalMonth((calMonth + 1) % 12)}
+          onOpenDay={openDay}
+        />
+      )}
+
+      {day && (
+        <DayWindow
+          z={zIndex.day}
+          onFocus={() => focus("day")}
+          onClose={() => setDay(null)}
+          title={`Every year on ${MONTHS[day.m]} ${day.d}`}
+          frames={dayFrames}
+          onPrevDay={() => shiftDay(-1)}
+          onNextDay={() => shiftDay(1)}
+          onOpenFrame={openFrame}
+        />
+      )}
+
+      {aboutOpen && (
+        <AboutWindow z={zIndex.about} onFocus={() => focus("about")} onClose={() => setAboutOpen(false)} />
+      )}
+
+      {loginOpen && (
+        <LoginWindow
+          z={zIndex.login}
+          onFocus={() => focus("login")}
+          onClose={() => {
+            setLoginOpen(false)
+            setLoginError(false)
+          }}
+          error={loginError}
+          onSubmit={submitLogin}
+        />
+      )}
+
+      {lightbox && (
+        <Lightbox
+          state={lightbox}
+          onClose={() => setLightbox(null)}
+          onThisDay={lightboxThisDay}
+        />
+      )}
+
+      <Taskbar
+        clock={clock}
+        authed={authed}
+        onAbout={openAbout}
+        onClock={clockClick}
+        reelOpen={reelOpen}
+        albumOpen={albumOpen}
+        loginOpen={loginOpen}
+        onReel={openReel}
+        onAlbum={openAlbum}
+        onLogin={() => focus("login")}
+      />
+
+      <input ref={fileRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
+    </div>
+  )
+}

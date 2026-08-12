@@ -1,9 +1,9 @@
-import { DailyReel } from "@/components/daily-reel"
+import { Desktop } from "@/components/desktop"
 
 export default function Page() {
   return (
     <main>
-      <DailyReel />
+      <Desktop />
     </main>
   )
 }
