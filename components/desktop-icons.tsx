@@ -12,11 +12,11 @@ function IconButton({
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center gap-[5px] bg-transparent border border-dotted border-transparent p-1 cursor-pointer font-[inherit] hover:border-white/55"
+      className="flex flex-col items-center gap-[5px] bg-transparent border border-dotted border-transparent p-1 cursor-pointer font-[inherit] hover:border-white/55 w-[76px] sm:w-full"
     >
       {children}
       <span
-        className="text-white text-[11px] leading-tight text-center"
+        className="text-white text-[11px] leading-tight text-center text-balance"
         style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.6)" }}
       >
         {label}
@@ -31,15 +31,17 @@ export function DesktopIcons({
   onAlbum,
   onCalendar,
   onAbout,
+  onDonate,
 }: {
   todayDayNum: string
   onReel: () => void
   onAlbum: () => void
   onCalendar: () => void
   onAbout: () => void
+  onDonate: () => void
 }) {
   return (
-    <div className="absolute left-3.5 top-3.5 flex flex-col gap-[18px] w-[92px] z-[2]">
+    <div className="absolute z-[2] left-2 right-2 top-2 flex flex-row flex-wrap justify-start gap-2 sm:left-3.5 sm:right-auto sm:top-3.5 sm:w-[92px] sm:flex-col sm:gap-[18px]">
       <IconButton label="Daily Reel" onClick={onReel}>
         <img
           src="/logo.png"
@@ -49,7 +51,7 @@ export function DesktopIcons({
         />
       </IconButton>
 
-      <IconButton label="Photo Album" onClick={onAlbum}>
+      <IconButton label="2026 Frames" onClick={onAlbum}>
         <span className="grid grid-cols-2 gap-[3px] w-11 h-11 p-1 bg-face bevel">
           <span className="bg-accent" />
           <span className="bg-white" />
@@ -67,9 +69,15 @@ export function DesktopIcons({
         </span>
       </IconButton>
 
-      <IconButton label="Read Me" onClick={onAbout}>
+      <IconButton label="About This Project" onClick={onAbout}>
         <span className="flex items-center justify-center w-11 h-11 bg-face text-[#000080] text-[26px] font-bold italic bevel">
           i
+        </span>
+      </IconButton>
+
+      <IconButton label="Donate" onClick={onDonate}>
+        <span className="flex items-center justify-center w-11 h-11 bg-[#008cff] text-white text-[22px] font-bold italic bevel">
+          V
         </span>
       </IconButton>
     </div>

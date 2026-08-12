@@ -10,8 +10,9 @@ import { useCallback, useRef } from "react"
 export function useDragWindow(onFocus?: () => void) {
   const ref = useRef<HTMLDivElement>(null)
 
+  // Pointer-based so a single handler works for both mouse and touch (mobile).
   const onMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+    (e: React.PointerEvent) => {
       // Don't start a drag when a control inside the title bar is clicked.
       if ((e.target as HTMLElement).closest("button")) return
       const win = ref.current
@@ -31,16 +32,21 @@ export function useDragWindow(onFocus?: () => void) {
       const dx = e.clientX - r.left
       const dy = e.clientY - r.top
 
-      const move = (ev: MouseEvent) => {
-        win.style.left = `${Math.max(0, ev.clientX - dx - hr.left)}px`
-        win.style.top = `${Math.max(0, ev.clientY - dy - hr.top)}px`
+      const move = (ev: PointerEvent) => {
+        // Keep the window within the host bounds so it can't be dragged off-screen.
+        const maxLeft = Math.max(0, host.clientWidth - win.offsetWidth)
+        const maxTop = Math.max(0, host.clientHeight - win.offsetHeight)
+        const nextLeft = Math.min(Math.max(0, ev.clientX - dx - hr.left), maxLeft)
+        const nextTop = Math.max(0, Math.min(ev.clientY - dy - hr.top, maxTop || Infinity))
+        win.style.left = `${nextLeft}px`
+        win.style.top = `${nextTop}px`
       }
       const up = () => {
-        window.removeEventListener("mousemove", move)
-        window.removeEventListener("mouseup", up)
+        window.removeEventListener("pointermove", move)
+        window.removeEventListener("pointerup", up)
       }
-      window.addEventListener("mousemove", move)
-      window.addEventListener("mouseup", up)
+      window.addEventListener("pointermove", move)
+      window.addEventListener("pointerup", up)
       e.preventDefault()
     },
     [onFocus],
@@ -59,14 +65,14 @@ export function TitleBar({
   title: string
   icon?: string
   onClose: () => void
-  onMouseDown: (e: React.MouseEvent) => void
+  onMouseDown: (e: React.PointerEvent) => void
   extraControls?: boolean
 }) {
   return (
     <div
-      onMouseDown={onMouseDown}
+      onPointerDown={onMouseDown}
       className="flex items-center gap-1.5 px-[3px] py-[3px] pl-1.5 cursor-move select-none"
-      style={{ background: "linear-gradient(90deg, #000080 0%, #1084d0 100%)" }}
+      style={{ background: "linear-gradient(90deg, #000080 0%, #1084d0 100%)", touchAction: "none" }}
     >
       {icon ? (
         <img

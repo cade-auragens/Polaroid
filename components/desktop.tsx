@@ -161,6 +161,7 @@ export function Desktop() {
   const openAlbum = () => openWindow(setAlbumOpen, "album")
   const openCalendar = () => openWindow(setCalendarOpen, "calendar")
   const openAbout = () => openWindow(setAboutOpen, "about")
+  const openDonate = () => window.open("https://venmo.com/u/camlabrecque", "_blank", "noopener,noreferrer")
 
   const openDay = useCallback(
     (m: number, d: number) => {
@@ -183,7 +184,11 @@ export function Desktop() {
   // Derived data
   const count = frames.length
   const last = photos[photos.length - 1]
-  const albumFrames = useMemo(() => frames.slice().reverse(), [frames])
+  // "2026 Frames" — only photos dated in 2026, most recent on top.
+  const albumFrames = useMemo(
+    () => frames.filter((f) => f.yearLabel === "2026").reverse(),
+    [frames],
+  )
 
   const dayKey = day ? `${String(day.m + 1).padStart(2, "0")}-${String(day.d).padStart(2, "0")}` : null
   const dayFrames = useMemo(
@@ -221,6 +226,7 @@ export function Desktop() {
         onAlbum={openAlbum}
         onCalendar={openCalendar}
         onAbout={openAbout}
+        onDonate={openDonate}
       />
 
       {reelOpen && (
@@ -245,7 +251,7 @@ export function Desktop() {
           onFocus={() => focus("album")}
           onClose={() => setAlbumOpen(false)}
           frames={albumFrames}
-          count={count}
+          count={albumFrames.length}
           onOpenFrame={openFrame}
         />
       )}

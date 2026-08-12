@@ -51,11 +51,8 @@ export function ReelWindow({
       ref={ref}
       data-window="reel"
       onMouseDown={onFocus}
-      className="absolute bg-face p-[3px] bevel"
+      className="absolute bg-face p-[3px] bevel left-1 top-[96px] w-[calc(100%-8px)] sm:left-[132px] sm:top-[26px] sm:w-[min(1000px,calc(100%-168px))]"
       style={{
-        left: 132,
-        top: 26,
-        width: "min(1000px, calc(100% - 168px))",
         zIndex: z ?? 12,
         boxShadow:
           "inset -1px -1px 0 #0a0a0a, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #808080, inset 2px 2px 0 #dfdfdf, 3px 3px 0 rgba(0,0,0,0.35)",
@@ -84,7 +81,7 @@ export function ReelWindow({
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-1.5 px-[5px] py-1 mx-[3px] bg-face groove">
+      <div className="flex flex-wrap items-center gap-1.5 px-[5px] py-1 mx-[3px] bg-face groove">
         {authed && (
           <Win95Button
             onClick={onUpload}
@@ -135,11 +132,11 @@ export function ReelWindow({
             ))}
           </div>
         ) : (
-          <div className="flex items-center justify-center gap-[22px] px-6 py-2.5">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-[22px] px-4 sm:px-6 py-2.5">
             <img
               src="/logo.png"
               alt="The Daily Polaroid Project logo"
-              className="w-[150px] h-[150px] object-cover"
+              className="w-[110px] h-[110px] sm:w-[150px] sm:h-[150px] object-cover"
               style={{ objectPosition: "center 44%", boxShadow: "3px 3px 0 rgba(0,0,0,0.4)" }}
             />
             <div className="max-w-[380px] px-4 py-3.5 bg-face bevel">
@@ -154,9 +151,9 @@ export function ReelWindow({
       </div>
 
       {/* Status bar */}
-      <div className="flex gap-[3px] m-[3px] text-[11px]">
-        <span className="flex-none min-w-[116px] px-1.5 py-[3px] groove">{countLabel}</span>
-        <span className="flex-1 px-1.5 py-[3px] groove truncate">{latestLabel}</span>
+      <div className="flex flex-wrap gap-[3px] m-[3px] text-[11px]">
+        <span className="flex-none min-w-[100px] px-1.5 py-[3px] groove">{countLabel}</span>
+        <span className="flex-1 min-w-[140px] px-1.5 py-[3px] groove truncate">{latestLabel}</span>
         <span className="flex-none min-w-[112px] px-1.5 py-[3px] groove">{authLabel}</span>
       </div>
     </div>

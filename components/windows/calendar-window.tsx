@@ -40,10 +40,8 @@ export function CalendarWindow({
       ref={ref}
       data-window="calendar"
       onMouseDown={onFocus}
-      className="absolute bg-face p-[3px] bevel w-[320px]"
+      className="absolute bg-face p-[3px] bevel left-1 top-[104px] w-[calc(100%-8px)] sm:left-[60px] sm:top-[150px] sm:w-[320px]"
       style={{
-        left: 60,
-        top: 150,
         zIndex: z ?? 15,
         boxShadow:
           "inset -1px -1px 0 #0a0a0a, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #808080, inset 2px 2px 0 #dfdfdf, 3px 3px 0 rgba(0,0,0,0.35)",

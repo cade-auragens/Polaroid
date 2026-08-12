@@ -38,11 +38,11 @@ export function LoginWindow({
       ref={ref}
       data-window="login"
       onMouseDown={onFocus}
-      className="absolute z-50"
-      style={{ right: 24, bottom: 66, zIndex: z ?? 50 }}
+      className="absolute z-50 left-1 right-1 bottom-[38px] sm:left-auto sm:right-6 sm:bottom-[66px]"
+      style={{ zIndex: z ?? 50 }}
     >
       <div
-        className="w-[336px] bg-face p-[3px] bevel"
+        className="w-full sm:w-[336px] bg-face p-[3px] bevel"
         style={{
           boxShadow:
             "inset -1px -1px 0 #0a0a0a, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #808080, inset 2px 2px 0 #dfdfdf, 4px 4px 0 rgba(0,0,0,0.4)",

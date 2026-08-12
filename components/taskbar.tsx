@@ -46,23 +46,23 @@ export function Taskbar({
       {reelOpen && (
         <button
           onClick={onReel}
-          className="h-[22px] min-w-[150px] px-2 text-left bg-face bevel-in text-[#0a0a0a] text-[11px] cursor-pointer font-[inherit] truncate"
+          className="h-[22px] w-[92px] sm:w-auto sm:min-w-[150px] px-2 text-left bg-face bevel-in text-[#0a0a0a] text-[11px] cursor-pointer font-[inherit] truncate"
         >
-          The Daily Polaroid P...
+          Reel
         </button>
       )}
       {albumOpen && (
         <button
           onClick={onAlbum}
-          className="win95-btn h-[22px] min-w-[130px] px-2 text-left bg-face bevel text-[#0a0a0a] text-[11px] cursor-pointer font-[inherit]"
+          className="win95-btn h-[22px] w-[84px] sm:w-auto sm:min-w-[130px] px-2 text-left bg-face bevel text-[#0a0a0a] text-[11px] cursor-pointer font-[inherit] truncate"
         >
-          Photo Album
+          2026 Frames
         </button>
       )}
       {loginOpen && (
         <button
           onClick={onLogin}
-          className="win95-btn h-[22px] min-w-[120px] px-2 text-left bg-face bevel text-[#0a0a0a] text-[11px] cursor-pointer font-[inherit]"
+          className="win95-btn h-[22px] w-[76px] sm:w-auto sm:min-w-[120px] px-2 text-left bg-face bevel text-[#0a0a0a] text-[11px] cursor-pointer font-[inherit] truncate"
         >
           Log On
         </button>

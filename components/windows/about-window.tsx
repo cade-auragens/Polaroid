@@ -18,16 +18,14 @@ export function AboutWindow({
       ref={ref}
       data-window="about"
       onMouseDown={onFocus}
-      className="absolute bg-face p-[3px] bevel w-[372px]"
+      className="absolute bg-face p-[3px] bevel left-1 right-1 top-[104px] w-auto sm:left-auto sm:right-8 sm:top-20 sm:w-[372px]"
       style={{
-        right: 32,
-        top: 80,
         zIndex: z ?? 16,
         boxShadow:
           "inset -1px -1px 0 #0a0a0a, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #808080, inset 2px 2px 0 #dfdfdf, 3px 3px 0 rgba(0,0,0,0.35)",
       }}
     >
-      <TitleBar title="Read Me" onClose={onClose} onMouseDown={onMouseDown} extraControls={false} />
+      <TitleBar title="About This Project" onClose={onClose} onMouseDown={onMouseDown} extraControls={false} />
 
       <div className="p-3">
         <img

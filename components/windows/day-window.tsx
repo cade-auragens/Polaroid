@@ -30,11 +30,8 @@ export function DayWindow({
       ref={ref}
       data-window="day"
       onMouseDown={onFocus}
-      className="absolute bg-face p-[3px] bevel"
+      className="absolute bg-face p-[3px] bevel left-1 top-[112px] w-[calc(100%-8px)] sm:left-[300px] sm:top-[200px] sm:w-[min(620px,calc(100%-340px))]"
       style={{
-        left: 300,
-        top: 200,
-        width: "min(620px, calc(100% - 340px))",
         zIndex: z ?? 18,
         boxShadow:
           "inset -1px -1px 0 #0a0a0a, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #808080, inset 2px 2px 0 #dfdfdf, 3px 3px 0 rgba(0,0,0,0.35)",
@@ -53,8 +50,8 @@ export function DayWindow({
         <span className="text-[11px] text-[#404040]">{dayCountLabel}</span>
       </div>
 
-      <div className="mx-[3px] mb-[3px] p-3.5 max-h-[340px] overflow-y-auto bg-white sunk">
-        <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))" }}>
+      <div className="mx-[3px] mb-[3px] p-3.5 max-h-[55vh] sm:max-h-[340px] overflow-y-auto bg-white sunk">
+        <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))" }}>
           {frames.map((f) => (
             <PhotoFrame
               key={f.iso}
