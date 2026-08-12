@@ -85,18 +85,19 @@ export function ReelWindow({
 
       {/* Toolbar */}
       <div className="flex items-center gap-1.5 px-[5px] py-1 mx-[3px] bg-face groove">
-        <Win95Button
-          onClick={onUpload}
-          disabled={!authed}
-          title={authed ? "Add today's frame" : "Sign in from the clock to upload"}
-          className="flex items-center gap-1.5 h-6 px-2.5 whitespace-nowrap text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span
-            className="w-2.5 h-2.5 bg-[#ff0000] rounded-full"
-            style={{ boxShadow: "0 0 0 2px #ffffff, 0 0 0 3px #0a0a0a" }}
-          />
-          Add Today&apos;s Frame
-        </Win95Button>
+        {authed && (
+          <Win95Button
+            onClick={onUpload}
+            title="Add today's frame"
+            className="flex items-center gap-1.5 h-6 px-2.5 whitespace-nowrap text-xs font-bold"
+          >
+            <span
+              className="w-2.5 h-2.5 bg-[#ff0000] rounded-full"
+              style={{ boxShadow: "0 0 0 2px #ffffff, 0 0 0 3px #0a0a0a" }}
+            />
+            Add Today&apos;s Frame
+          </Win95Button>
+        )}
         <Win95Button onClick={onOpenAlbum} className="h-6 px-2.5 whitespace-nowrap text-xs">
           Open Album
         </Win95Button>

@@ -157,10 +157,7 @@ export function Desktop() {
     [focus],
   )
 
-  const openReel = () => {
-    // Reel is only accessible after signing in
-    if (authed) openWindow(setReelOpen, "reel")
-  }
+  const openReel = () => openWindow(setReelOpen, "reel")
   const openAlbum = () => openWindow(setAlbumOpen, "album")
   const openCalendar = () => openWindow(setCalendarOpen, "calendar")
   const openAbout = () => openWindow(setAboutOpen, "about")
