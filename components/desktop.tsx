@@ -44,6 +44,8 @@ export function Desktop() {
   const [day, setDay] = useState<DayState>(null)
   const [lightbox, setLightbox] = useState<LightboxState>(null)
   const [clock, setClock] = useState("")
+  // Computed after mount to avoid SSR/client timezone hydration mismatch
+  const [todayNum, setTodayNum] = useState("")
 
   const [zTop, setZTop] = useState(20)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -71,6 +73,7 @@ export function Desktop() {
   }, [load])
 
   useEffect(() => {
+    setTodayNum(String(new Date().getDate()))
     const tick = () => {
       const d = new Date()
       let h = d.getHours()
@@ -220,7 +223,7 @@ export function Desktop() {
       />
 
       <DesktopIcons
-        todayDayNum={String(new Date().getDate())}
+        todayDayNum={todayNum}
         onReel={openReel}
         onAlbum={openAlbum}
         onCalendar={openCalendar}
