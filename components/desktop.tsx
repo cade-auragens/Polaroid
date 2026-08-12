@@ -216,8 +216,7 @@ export function Desktop() {
       <img
         src="/title.png"
         alt="The Daily Polaroid Project — By: Cam Labrecque"
-        className="absolute left-1/2 top-1/2 pointer-events-none z-[1]"
-        style={{ transform: "translate(-50%, -54%)", width: "min(660px, 62%)" }}
+        className="absolute left-1/2 top-[4%] w-[46%] -translate-x-1/2 sm:top-1/2 sm:w-[min(660px,62%)] sm:-translate-y-[54%] pointer-events-none z-[1]"
       />
 
       <DesktopIcons
