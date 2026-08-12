@@ -123,7 +123,6 @@ export function Desktop() {
     setLoginError(false)
     setReelOpen(true)
     focus("reel")
-    setTimeout(() => fileRef.current?.click(), 120)
   }, [focus])
 
   const submitLogin = useCallback((user: string, pass: string) => {
@@ -135,13 +134,9 @@ export function Desktop() {
   }, [afterLogin])
 
   const tryUpload = useCallback(() => {
+    // Uploading is only available once signed in. Sign in via the taskbar clock.
     if (authed) fileRef.current?.click()
-    else {
-      setLoginOpen(true)
-      setLoginError(false)
-      focus("login")
-    }
-  }, [authed, focus])
+  }, [authed])
 
   const clockClick = useCallback(() => {
     if (authed) setAuthed(false)
