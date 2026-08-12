@@ -32,8 +32,8 @@ export function Desktop() {
   const [photos, setPhotos] = useState<Photo[]>([])
   const [authed, setAuthed] = useState(false)
 
-  // Window open state
-  const [reelOpen, setReelOpen] = useState(true)
+  // Window open state — the Reel is hidden until the user signs in via the clock
+  const [reelOpen, setReelOpen] = useState(false)
   const [albumOpen, setAlbumOpen] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [aboutOpen, setAboutOpen] = useState(false)
@@ -139,8 +139,10 @@ export function Desktop() {
   }, [authed])
 
   const clockClick = useCallback(() => {
-    if (authed) setAuthed(false)
-    else {
+    if (authed) {
+      setAuthed(false)
+      setReelOpen(false)
+    } else {
       setLoginOpen(true)
       setLoginError(false)
       focus("login")
@@ -155,7 +157,10 @@ export function Desktop() {
     [focus],
   )
 
-  const openReel = () => openWindow(setReelOpen, "reel")
+  const openReel = () => {
+    // Reel is only accessible after signing in
+    if (authed) openWindow(setReelOpen, "reel")
+  }
   const openAlbum = () => openWindow(setAlbumOpen, "album")
   const openCalendar = () => openWindow(setCalendarOpen, "calendar")
   const openAbout = () => openWindow(setAboutOpen, "about")
