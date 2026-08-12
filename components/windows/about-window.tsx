@@ -38,6 +38,19 @@ export function AboutWindow({
           One photograph a day, kept in the order it was taken. The reel spools left; the album holds every frame.
           Nothing is deleted and nothing is reordered.
         </p>
+        <div className="mt-3 flex justify-center">
+          <figure className="m-0 bg-white p-2 pb-6" style={{ boxShadow: "2px 2px 0 rgba(0,0,0,0.35), 0 0 0 1px #0a0a0a" }}>
+            <img
+              src="/about-portrait.jpeg"
+              alt="Cam Labrecque in front of a wall of polaroid photos"
+              className="block w-[180px] aspect-square object-cover"
+              style={{ boxShadow: "inset 1px 1px 0 #808080, 0 0 0 1px #0a0a0a" }}
+            />
+            <figcaption className="font-w95fa mt-2 text-center text-[15px] leading-none text-[#000080]">
+              Cam Labrecque
+            </figcaption>
+          </figure>
+        </div>
         <div className="flex justify-end mt-3">
           <Win95Button onClick={onClose} className="min-w-[76px] h-6 text-xs">
             OK
