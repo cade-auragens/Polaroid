@@ -41,7 +41,7 @@ export function DesktopIcons({
   onDonate: () => void
 }) {
   return (
-    <div className="absolute z-[2] left-1/2 -translate-x-1/2 top-[34%] flex flex-col items-center gap-3.5 sm:left-3.5 sm:translate-x-0 sm:right-auto sm:top-3.5 sm:w-[92px] sm:items-stretch sm:gap-[18px]">
+    <div className="absolute z-[2] left-3 top-[30%] flex flex-col items-start gap-3.5 sm:left-3.5 sm:top-3.5 sm:w-[92px] sm:items-stretch sm:gap-[18px]">
       <IconButton label="Daily Reel" onClick={onReel}>
         <img
           src="/logo.png"
