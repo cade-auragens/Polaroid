@@ -45,6 +45,7 @@ export function AlbumWindow({
                 url={f.url}
                 topLabel={f.dayLabel}
                 bottomLabel=""
+                width={240}
                 hoverBg="#ffffcc"
                 onClick={() => onOpenFrame(f)}
               />
