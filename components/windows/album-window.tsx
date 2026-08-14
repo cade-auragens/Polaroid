@@ -38,7 +38,7 @@ export function AlbumWindow({
       <div
         className="mt-1 mx-[3px] mb-[3px] p-3.5 max-h-[60vh] sm:max-h-[380px] overflow-y-auto overflow-x-hidden bg-white sunk"
       >
-        <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))" }}>
+        <div className="flex flex-col items-center gap-4">
           {frames.map((f) => (
             <div key={f.iso} className="flex flex-col items-center gap-1.5">
               <PhotoFrame
