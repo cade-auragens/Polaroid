@@ -5,5 +5,6 @@
 //
 // To add a day: drop the image in /public/seed/, then add a row below.
 export const SEED_PHOTOS: { date: string; url: string }[] = [
+  { date: "2026-08-12", url: "/seed/2026-08-12.jpeg" },
   { date: "2026-08-13", url: "/seed/2026-08-13.jpeg" },
 ]
