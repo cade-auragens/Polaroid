@@ -36,7 +36,7 @@ export function AlbumWindow({
       <TitleBar title="2026 Frames" onClose={onClose} onMouseDown={onMouseDown} extraControls={false} />
 
       <div
-        className="mt-1 mx-[3px] mb-[3px] p-3.5 max-h-[60vh] sm:max-h-[380px] overflow-y-auto bg-white sunk"
+        className="mt-1 mx-[3px] mb-[3px] p-3.5 max-h-[60vh] sm:max-h-[380px] overflow-y-auto overflow-x-hidden bg-white sunk"
       >
         <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))" }}>
           {frames.map((f) => (
