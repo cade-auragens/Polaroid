@@ -41,13 +41,6 @@ export function Hero({
         </Win95Button>
       </div>
 
-      <p
-        className="m-0 max-w-[360px] text-center text-[11px] leading-snug text-white"
-        style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.6)" }}
-      >
-        This project costs $756 a year to keep running. Please consider donating to help.
-      </p>
-
       {yesterdayFrame ? (
         <PhotoFrame
           url={yesterdayFrame.url}

@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { getAllPhotos, uploadPhoto, todayIso, yesterdayIso, formatDate, downscale, type Photo } from "@/lib/photo-db"
 import { Hero } from "@/components/hero"
-import { DesktopIcons } from "@/components/desktop-icons"
 import { ReelWindow } from "@/components/windows/reel-window"
 import { AlbumWindow } from "@/components/windows/album-window"
 import { CalendarWindow } from "@/components/windows/calendar-window"
@@ -50,8 +49,6 @@ export function Desktop() {
   const [day, setDay] = useState<DayState>(null)
   const [lightbox, setLightbox] = useState<LightboxState>(null)
   const [clock, setClock] = useState("")
-  // Computed after mount to avoid SSR/client timezone hydration mismatch
-  const [todayNum, setTodayNum] = useState("")
 
   const [zTop, setZTop] = useState(20)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -79,7 +76,6 @@ export function Desktop() {
   }, [load])
 
   useEffect(() => {
-    setTodayNum(String(new Date().getDate()))
     const tick = () => {
       const d = new Date()
       let h = d.getHours()
@@ -285,15 +281,6 @@ export function Desktop() {
         onAbout={openAbout}
         onDonate={openDonate}
         onInspiration={openInspiration}
-      />
-
-      <DesktopIcons
-        todayDayNum={todayNum}
-        onReel={openReel}
-        onAlbum={openAlbum}
-        onCalendar={openCalendar}
-        onAbout={openAbout}
-        onDonate={openDonate}
       />
 
       {reelOpen && (
