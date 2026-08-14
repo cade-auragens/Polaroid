@@ -60,7 +60,14 @@ export function Desktop() {
 
   const load = useCallback(async () => {
     try {
-      setPhotos(await getAllPhotos())
+      let all = await getAllPhotos()
+      // Seed a sample frame for yesterday if the board has none for that date.
+      const yIso = yesterdayIso()
+      if (!all.some((p) => p.date === yIso)) {
+        await putPhoto({ date: yIso, url: "/yesterday.jpeg", added: Date.now() })
+        all = await getAllPhotos()
+      }
+      setPhotos(all)
     } catch (e) {
       console.warn("photo store unavailable", e)
     }
