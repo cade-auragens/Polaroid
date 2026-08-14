@@ -58,7 +58,7 @@ export function Lightbox({
             <span
               className="block w-full"
               style={{
-                aspectRatio: "1",
+                aspectRatio: "4 / 5",
                 backgroundColor: "#000080",
                 backgroundSize: "cover",
                 backgroundPosition: "center",

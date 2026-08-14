@@ -130,6 +130,7 @@ export function PhotoFrame({
   onClick,
   width,
   hoverBg = "#ffffff",
+  aspect = "4 / 5",
 }: {
   url: string
   topLabel: string
@@ -137,6 +138,8 @@ export function PhotoFrame({
   onClick: () => void
   width?: number
   hoverBg?: string
+  /** CSS aspect-ratio for the photo area, e.g. "4 / 5" (portrait) or "1" (square). */
+  aspect?: string
 }) {
   return (
     <button
@@ -151,7 +154,7 @@ export function PhotoFrame({
         className="block w-full transition-colors"
         style={{
           width: width ? `${width - 18}px` : "100%",
-          aspectRatio: "1",
+          aspectRatio: aspect,
           backgroundColor: "#000080",
           backgroundSize: "cover",
           backgroundPosition: "center",

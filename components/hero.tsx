@@ -65,7 +65,7 @@ export function Hero({
             className="flex items-center justify-center px-3 text-center"
             style={{
               width: "222px",
-              aspectRatio: "1",
+              aspectRatio: "4 / 5",
               backgroundColor: "#000080",
               boxShadow: "0 0 0 1px #0a0a0a",
             }}

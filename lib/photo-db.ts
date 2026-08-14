@@ -1,47 +1,31 @@
 export type Photo = {
   date: string // ISO yyyy-mm-dd, used as key
-  url: string // data URL
+  url: string
   added: number
 }
 
-const DB_NAME = "polaroid-board"
-const STORE = "photos"
-
-let dbPromise: Promise<IDBDatabase> | null = null
-
-function getDb(): Promise<IDBDatabase> {
-  if (dbPromise) return dbPromise
-  dbPromise = new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1)
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore(STORE, { keyPath: "date" })
-    }
-    request.onsuccess = () => resolve(request.result)
-    request.onerror = () => reject(request.error)
-  })
-  return dbPromise
-}
-
-async function tx<T>(
-  mode: IDBTransactionMode,
-  fn: (store: IDBObjectStore) => IDBRequest<T> | void,
-): Promise<T | undefined> {
-  const db = await getDb()
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE, mode)
-    const request = fn(transaction.objectStore(STORE))
-    transaction.oncomplete = () => resolve(request ? (request.result as T) : undefined)
-    transaction.onerror = () => reject(transaction.error)
-  })
-}
-
+// Fetch the shared photo list from the server. This is public — every visitor
+// sees the same list, since it's backed by real storage, not the browser's own
+// local storage.
 export async function getAllPhotos(): Promise<Photo[]> {
-  const all = (await tx<Photo[]>("readonly", (s) => s.getAll())) ?? []
-  return all.sort((a, b) => a.date.localeCompare(b.date))
+  const res = await fetch("/api/photos", { cache: "no-store" })
+  if (!res.ok) throw new Error("Failed to load photos")
+  const data = (await res.json()) as { photos: Photo[] }
+  return data.photos.sort((a, b) => a.date.localeCompare(b.date))
 }
 
-export async function putPhoto(photo: Photo): Promise<void> {
-  await tx("readwrite", (s) => s.put(photo))
+// Upload a photo for a given date. `password` is checked server-side against
+// UPLOAD_PASSWORD — this is the real access control, not the client-side login UI.
+export async function uploadPhoto(file: Blob, date: string, password: string): Promise<void> {
+  const form = new FormData()
+  form.append("file", file, `${date}.jpg`)
+  form.append("date", date)
+  form.append("password", password)
+  const res = await fetch("/api/photos", { method: "POST", body: form })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}) as { error?: string })
+    throw new Error(body.error || "Upload failed.")
+  }
 }
 
 export function todayIso(): string {
@@ -60,8 +44,9 @@ export function formatDate(iso: string): string {
   return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: "short", day: "numeric" })
 }
 
-// Downscale an uploaded image to a data URL, capping the longest side.
-export function downscale(file: File): Promise<string> {
+// Downscale an uploaded image to a JPEG blob, capping the longest side, before
+// it goes over the wire.
+export function downscale(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => {
@@ -79,7 +64,11 @@ export function downscale(file: File): Promise<string> {
           return
         }
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-        resolve(canvas.toDataURL("image/jpeg", 0.86))
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error("Failed to encode image"))),
+          "image/jpeg",
+          0.86,
+        )
       }
       img.onerror = reject
       img.src = reader.result as string

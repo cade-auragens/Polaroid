@@ -1,14 +1,17 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { getAllPhotos, putPhoto, todayIso, yesterdayIso, formatDate, downscale, type Photo } from "@/lib/photo-db"
+import { getAllPhotos, uploadPhoto, todayIso, yesterdayIso, formatDate, downscale, type Photo } from "@/lib/photo-db"
 import { Hero } from "@/components/hero"
+import { DesktopIcons } from "@/components/desktop-icons"
 import { ReelWindow } from "@/components/windows/reel-window"
 import { AlbumWindow } from "@/components/windows/album-window"
 import { CalendarWindow } from "@/components/windows/calendar-window"
 import { DayWindow } from "@/components/windows/day-window"
 import { AboutWindow } from "@/components/windows/about-window"
+import { DonateWindow } from "@/components/windows/donate-window"
 import { LoginWindow } from "@/components/windows/login-window"
+import { MessageWindow, type DialogState } from "@/components/windows/message-window"
 import { Lightbox } from "@/components/windows/lightbox"
 import { Taskbar } from "@/components/taskbar"
 
@@ -31,19 +34,24 @@ export type DayState = { m: number; d: number } | null
 export function Desktop() {
   const [photos, setPhotos] = useState<Photo[]>([])
   const [authed, setAuthed] = useState(false)
+  const [authPassword, setAuthPassword] = useState("")
 
   // Window open state — the Reel is hidden until the user signs in via the clock
   const [reelOpen, setReelOpen] = useState(false)
   const [albumOpen, setAlbumOpen] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [aboutOpen, setAboutOpen] = useState(false)
+  const [donateOpen, setDonateOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
   const [loginError, setLoginError] = useState(false)
+  const [dialog, setDialog] = useState<DialogState>(null)
 
   const [calMonth, setCalMonth] = useState(new Date().getMonth())
   const [day, setDay] = useState<DayState>(null)
   const [lightbox, setLightbox] = useState<LightboxState>(null)
   const [clock, setClock] = useState("")
+  // Computed after mount to avoid SSR/client timezone hydration mismatch
+  const [todayNum, setTodayNum] = useState("")
 
   const [zTop, setZTop] = useState(20)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -60,16 +68,9 @@ export function Desktop() {
 
   const load = useCallback(async () => {
     try {
-      let all = await getAllPhotos()
-      // Seed a sample frame for yesterday if the board has none for that date.
-      const yIso = yesterdayIso()
-      if (!all.some((p) => p.date === yIso)) {
-        await putPhoto({ date: yIso, url: "/yesterday.jpeg", added: Date.now() })
-        all = await getAllPhotos()
-      }
-      setPhotos(all)
+      setPhotos(await getAllPhotos())
     } catch (e) {
-      console.warn("photo store unavailable", e)
+      console.warn("photo list unavailable", e)
     }
   }, [])
 
@@ -78,6 +79,7 @@ export function Desktop() {
   }, [load])
 
   useEffect(() => {
+    setTodayNum(String(new Date().getDate()))
     const tick = () => {
       const d = new Date()
       let h = d.getHours()
@@ -107,21 +109,45 @@ export function Desktop() {
     focus("lightbox")
   }, [focus])
 
-  // File upload flow
+  // File upload flow. Uses in-app dialogs rather than window.confirm/alert, since
+  // native dialogs are blocked inside sandboxed preview iframes (v0, Vercel previews).
+  const doUpload = useCallback(
+    async (file: File, date: string) => {
+      try {
+        const blob = await downscale(file)
+        await uploadPhoto(blob, date, authPassword)
+        await load()
+      } catch (err) {
+        setDialog({
+          title: "Upload Failed",
+          message: err instanceof Error ? err.message : "Upload failed.",
+          tone: "error",
+        })
+      }
+    },
+    [authPassword, load],
+  )
+
   const onFile = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
       e.target.value = ""
       if (!file) return
       const date = todayIso()
-      if (photos.some((p) => p.date === date) && !window.confirm("A frame already exists for today. Replace it?")) {
+      if (photos.some((p) => p.date === date)) {
+        setDialog({
+          title: "Replace Today's Frame?",
+          message: "A frame already exists for today. Replacing it will overwrite the current photo.",
+          confirmLabel: "Replace",
+          onConfirm: () => {
+            void doUpload(file, date)
+          },
+        })
         return
       }
-      const url = await downscale(file)
-      await putPhoto({ date, url, added: Date.now() })
-      load()
+      void doUpload(file, date)
     },
-    [photos, load],
+    [photos, doUpload],
   )
 
   const afterLogin = useCallback(() => {
@@ -132,13 +158,34 @@ export function Desktop() {
     focus("reel")
   }, [focus])
 
-  const submitLogin = useCallback((user: string, pass: string) => {
-    if (user.trim().toUpperCase() === "POLAROID" && pass.trim().toUpperCase() === "VIBECODING") {
-      afterLogin()
-    } else {
-      setLoginError(true)
-    }
-  }, [afterLogin])
+  const submitLogin = useCallback(
+    async (user: string, pass: string) => {
+      // The username is just a UI nicety — the real check is the password,
+      // verified server-side against UPLOAD_PASSWORD so it's never exposed in
+      // the shipped JS.
+      if (user.trim().toUpperCase() !== "POLAROID") {
+        setLoginError(true)
+        return
+      }
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: pass }),
+        })
+        const data = await res.json().catch(() => ({ ok: false }))
+        if (data.ok) {
+          setAuthPassword(pass)
+          afterLogin()
+        } else {
+          setLoginError(true)
+        }
+      } catch {
+        setLoginError(true)
+      }
+    },
+    [afterLogin],
+  )
 
   const tryUpload = useCallback(() => {
     // Uploading is only available once signed in. Sign in via the taskbar clock.
@@ -149,6 +196,7 @@ export function Desktop() {
     if (authed) {
       setAuthed(false)
       setReelOpen(false)
+      setAuthPassword("")
     } else {
       setLoginOpen(true)
       setLoginError(false)
@@ -168,7 +216,11 @@ export function Desktop() {
   const openAlbum = () => openWindow(setAlbumOpen, "album")
   const openCalendar = () => openWindow(setCalendarOpen, "calendar")
   const openAbout = () => openWindow(setAboutOpen, "about")
-  const openDonate = () => window.open("https://venmo.com/u/Camlabrecque", "_blank", "noopener,noreferrer")
+  const openDonate = () => setDonateOpen(true)
+  const goToVenmo = () => {
+    window.open("https://venmo.com/u/Camlabrecque", "_blank", "noopener,noreferrer")
+    setDonateOpen(false)
+  }
   const openInspiration = () =>
     window.open("https://www.facebook.com/watch/?v=10155367058817365", "_blank", "noopener,noreferrer")
 
@@ -235,6 +287,15 @@ export function Desktop() {
         onInspiration={openInspiration}
       />
 
+      <DesktopIcons
+        todayDayNum={todayNum}
+        onReel={openReel}
+        onAlbum={openAlbum}
+        onCalendar={openCalendar}
+        onAbout={openAbout}
+        onDonate={openDonate}
+      />
+
       {reelOpen && (
         <ReelWindow
           z={zIndex.reel}
@@ -289,9 +350,9 @@ export function Desktop() {
         />
       )}
 
-      {aboutOpen && (
-        <AboutWindow z={zIndex.about} onFocus={() => focus("about")} onClose={() => setAboutOpen(false)} />
-      )}
+      {aboutOpen && <AboutWindow onClose={() => setAboutOpen(false)} />}
+
+      {donateOpen && <DonateWindow onClose={() => setDonateOpen(false)} onDonate={goToVenmo} />}
 
       {loginOpen && (
         <LoginWindow
@@ -313,6 +374,8 @@ export function Desktop() {
           onThisDay={lightboxThisDay}
         />
       )}
+
+      {dialog && <MessageWindow state={dialog} onClose={() => setDialog(null)} />}
 
       <Taskbar
         clock={clock}
