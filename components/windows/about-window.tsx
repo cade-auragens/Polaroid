@@ -31,12 +31,18 @@ export function AboutWindow({
         <img
           src="/title.png"
           alt="The Daily Polaroid Project — by Cam Labrecque"
-          className="block w-full max-h-[240px] object-cover"
+          className="block w-full h-auto object-contain"
           style={{ boxShadow: "inset 1px 1px 0 #808080, 0 0 0 1px #0a0a0a" }}
         />
-        <p className="mt-3 mb-0 text-xs leading-relaxed text-[#0a0a0a]">
-          One photograph a day, kept in the order it was taken. The reel spools left; the album holds every frame.
-          Nothing is deleted and nothing is reordered.
+        <p className="mt-3 mb-2 text-xs leading-relaxed text-[#0a0a0a]">
+          Cam Labrecque is an entrepreneur and filmmaker with a simple obsession: paying attention to the moments
+          most people scroll past. This project is his way of slowing down, one Polaroid a day, no exceptions,
+          through the good stretches and the hard ones alike.
+        </p>
+        <p className="m-0 text-xs leading-relaxed text-[#0a0a0a]">
+          There&apos;s no script here and no curation after the fact, just real days, revealed one frame at a time
+          as the project unfolds. In a world where almost anything can be generated, these are the moments no AI
+          could ever fake, because they actually happened.
         </p>
         <div className="mt-3 flex justify-center">
           <figure className="m-0 bg-white p-2 pb-6" style={{ boxShadow: "2px 2px 0 rgba(0,0,0,0.35), 0 0 0 1px #0a0a0a" }}>

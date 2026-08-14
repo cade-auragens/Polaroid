@@ -1,7 +1,8 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { getAllPhotos, putPhoto, todayIso, formatDate, downscale, type Photo } from "@/lib/photo-db"
+import { getAllPhotos, putPhoto, todayIso, yesterdayIso, formatDate, downscale, type Photo } from "@/lib/photo-db"
+import { Hero } from "@/components/hero"
 import { DesktopIcons } from "@/components/desktop-icons"
 import { ReelWindow } from "@/components/windows/reel-window"
 import { AlbumWindow } from "@/components/windows/album-window"
@@ -164,7 +165,9 @@ export function Desktop() {
   const openAlbum = () => openWindow(setAlbumOpen, "album")
   const openCalendar = () => openWindow(setCalendarOpen, "calendar")
   const openAbout = () => openWindow(setAboutOpen, "about")
-  const openDonate = () => window.open("https://venmo.com/u/camlabrecque", "_blank", "noopener,noreferrer")
+  const openDonate = () => window.open("https://venmo.com/u/Camlabrecque", "_blank", "noopener,noreferrer")
+  const openInspiration = () =>
+    window.open("https://www.facebook.com/watch/?v=10155367058817365", "_blank", "noopener,noreferrer")
 
   const openDay = useCallback(
     (m: number, d: number) => {
@@ -193,6 +196,11 @@ export function Desktop() {
     [frames],
   )
 
+  const yesterdayFrame = useMemo(
+    () => frames.find((f) => f.iso === yesterdayIso()) ?? null,
+    [frames],
+  )
+
   const dayKey = day ? `${String(day.m + 1).padStart(2, "0")}-${String(day.d).padStart(2, "0")}` : null
   const dayFrames = useMemo(
     () => (dayKey ? frames.filter((f) => f.iso.slice(5) === dayKey).reverse() : []),
@@ -215,11 +223,13 @@ export function Desktop() {
           "repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 3px)",
       }}
     >
-      {/* Centered title wallpaper */}
-      <img
-        src="/title.png"
-        alt="The Daily Polaroid Project — By: Cam Labrecque"
-        className="absolute left-1/2 top-[4%] w-[46%] -translate-x-1/2 sm:top-1/2 sm:w-[min(660px,62%)] sm:-translate-y-[54%] pointer-events-none z-[1]"
+      <Hero
+        yesterdayFrame={yesterdayFrame}
+        onOpenFrame={openFrame}
+        onAlbum={openAlbum}
+        onAbout={openAbout}
+        onDonate={openDonate}
+        onInspiration={openInspiration}
       />
 
       <DesktopIcons
