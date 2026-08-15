@@ -247,10 +247,19 @@ export function Desktop() {
     [frames],
   )
 
-  const yesterdayFrame = useMemo(
-    () => frames.find((f) => f.iso === yesterdayIso()) ?? null,
+  // The Hero shows the newest frame that exists — whatever day it's from — so a
+  // fresh upload appears immediately and the slot never goes blank while any
+  // frame exists. (frames are sorted oldest→newest, so the last one is newest.)
+  const heroFrame = useMemo<Frame | null>(
+    () => (frames.length ? frames[frames.length - 1] : null),
     [frames],
   )
+  const heroLabel = useMemo(() => {
+    if (!heroFrame) return "Latest"
+    if (heroFrame.iso === todayIso()) return "Today"
+    if (heroFrame.iso === yesterdayIso()) return "Yesterday"
+    return "Latest"
+  }, [heroFrame])
 
   const dayKey = day ? `${String(day.m + 1).padStart(2, "0")}-${String(day.d).padStart(2, "0")}` : null
   const dayFrames = useMemo(
@@ -275,7 +284,8 @@ export function Desktop() {
       }}
     >
       <Hero
-        yesterdayFrame={yesterdayFrame}
+        frame={heroFrame}
+        topLabel={heroLabel}
         onOpenFrame={openFrame}
         onAlbum={openAlbum}
         onAbout={openAbout}

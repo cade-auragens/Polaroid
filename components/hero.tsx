@@ -4,14 +4,16 @@ import { Win95Button, PhotoFrame } from "@/components/win95"
 import type { Frame } from "@/components/desktop"
 
 export function Hero({
-  yesterdayFrame,
+  frame,
+  topLabel,
   onOpenFrame,
   onAlbum,
   onAbout,
   onDonate,
   onInspiration,
 }: {
-  yesterdayFrame: Frame | null
+  frame: Frame | null
+  topLabel: string
   onOpenFrame: (f: Frame) => void
   onAlbum: () => void
   onAbout: () => void
@@ -41,13 +43,13 @@ export function Hero({
         </Win95Button>
       </div>
 
-      {yesterdayFrame ? (
+      {frame ? (
         <PhotoFrame
-          url={yesterdayFrame.url}
-          topLabel="Yesterday"
-          bottomLabel={yesterdayFrame.dateLabel}
+          url={frame.url}
+          topLabel={topLabel}
+          bottomLabel={frame.dateLabel}
           width={240}
-          onClick={() => onOpenFrame(yesterdayFrame)}
+          onClick={() => onOpenFrame(frame)}
         />
       ) : (
         <div
@@ -63,9 +65,9 @@ export function Hero({
               boxShadow: "0 0 0 1px #0a0a0a",
             }}
           >
-            <span className="text-[11px] leading-relaxed text-white/80">No frame from yesterday yet.</span>
+            <span className="text-[11px] leading-relaxed text-white/80">No frames yet.</span>
           </div>
-          <span className="mt-2 block text-[11px] font-bold text-[#303030]">Yesterday</span>
+          <span className="mt-2 block text-[11px] font-bold text-[#303030]">{topLabel}</span>
         </div>
       )}
     </section>
