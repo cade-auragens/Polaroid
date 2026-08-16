@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { getAllPhotos, uploadPhoto, todayIso, yesterdayIso, formatDate, downscale, type Photo } from "@/lib/photo-db"
+import { getAllPhotos, uploadPhoto, todayIso, formatDate, downscale, type Photo } from "@/lib/photo-db"
 import { Hero } from "@/components/hero"
 import { ReelWindow } from "@/components/windows/reel-window"
 import { AlbumWindow } from "@/components/windows/album-window"
@@ -250,16 +250,12 @@ export function Desktop() {
   // The Hero shows the newest frame that exists — whatever day it's from — so a
   // fresh upload appears immediately and the slot never goes blank while any
   // frame exists. (frames are sorted oldest→newest, so the last one is newest.)
+  // Its caption is the photo's OWN date, never anything derived from "today", so
+  // the frame keeps its real date until a newer photo replaces it.
   const heroFrame = useMemo<Frame | null>(
     () => (frames.length ? frames[frames.length - 1] : null),
     [frames],
   )
-  const heroLabel = useMemo(() => {
-    if (!heroFrame) return "Latest"
-    if (heroFrame.iso === todayIso()) return "Today"
-    if (heroFrame.iso === yesterdayIso()) return "Yesterday"
-    return "Latest"
-  }, [heroFrame])
 
   const dayKey = day ? `${String(day.m + 1).padStart(2, "0")}-${String(day.d).padStart(2, "0")}` : null
   const dayFrames = useMemo(
@@ -285,7 +281,7 @@ export function Desktop() {
     >
       <Hero
         frame={heroFrame}
-        topLabel={heroLabel}
+        topLabel="Latest"
         onOpenFrame={openFrame}
         onAlbum={openAlbum}
         onAbout={openAbout}
