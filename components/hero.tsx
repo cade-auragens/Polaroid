@@ -5,7 +5,6 @@ import type { Frame } from "@/components/desktop"
 
 export function Hero({
   frame,
-  topLabel,
   onOpenFrame,
   onAlbum,
   onAbout,
@@ -13,7 +12,6 @@ export function Hero({
   onInspiration,
 }: {
   frame: Frame | null
-  topLabel: string
   onOpenFrame: (f: Frame) => void
   onAlbum: () => void
   onAbout: () => void
@@ -46,7 +44,7 @@ export function Hero({
       {frame ? (
         <PhotoFrame
           url={frame.url}
-          topLabel={topLabel}
+          topLabel=""
           bottomLabel={frame.dateLabel}
           width={240}
           onClick={() => onOpenFrame(frame)}
@@ -67,7 +65,6 @@ export function Hero({
           >
             <span className="text-[11px] leading-relaxed text-white/80">No frames yet.</span>
           </div>
-          <span className="mt-2 block text-[11px] font-bold text-[#303030]">{topLabel}</span>
         </div>
       )}
     </section>

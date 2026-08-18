@@ -281,7 +281,6 @@ export function Desktop() {
     >
       <Hero
         frame={heroFrame}
-        topLabel="Latest"
         onOpenFrame={openFrame}
         onAlbum={openAlbum}
         onAbout={openAbout}
